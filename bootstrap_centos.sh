@@ -49,7 +49,7 @@ cat > /etc/puppetlabs/r10k/r10k.yaml <<EOF
 :cachedir: /var/cache/r10k
 :sources:
   :local:
-    remote: https://github.com/lbernail/puppet-r10k.git
+    remote: https://github.com/mariongimenez9/puppet-r10k
     basedir: /etc/puppetlabs/code/environments
 EOF
 
@@ -62,6 +62,6 @@ echo "Deploying with r10k"
 /opt/puppetlabs/puppet/bin/r10k deploy environment -v -p
 
 
-echo "Performing first puppet run"
+#echo "Performing first puppet run"
 # And remove default puppet.conf which raises warnings
-sudo /opt/puppetlabs/puppet/bin/puppet apply /etc/puppetlabs/code/environments/$env/manifests --modulepath=/etc/puppetlabs/code/environments/$env/modules:/etc/puppetlabs/code/environments/$env/site --environment=$env
+#sudo /opt/puppetlabs/puppet/bin/puppet apply /etc/puppetlabs/code/environments/$env/manifests --modulepath=/etc/puppetlabs/code/environments/$env/modules:/etc/puppetlabs/code/environments/$env/site --environment=$env

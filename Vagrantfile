@@ -16,6 +16,9 @@ DBIP="#{SUBNET}.3"
 REPORTSNAME="puppetreports"
 REPORTSIP="#{SUBNET}.4"
 
+MASTERNAME="puppetmaster2"
+MASTERIP="#{SUBNET}.5"
+
 AGENTS=["websrv"]
 
 
@@ -44,14 +47,24 @@ Vagrant.configure VAGRANTFILE_API_VERSION do |config|
 #  end
 
   config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
-
+  # workaround because of this Vagrant 1.8.5 issue (only on rhel-like distribs) => https://github.com/mitchellh/vagrant/issues/7610
+  config.ssh.insert_key = false
   config.vm.define :puppetmaster do |pm|
-    pm.vm.box = "boxcutter/ubuntu1604"
+    pm.vm.box = "boxcutter/centos72"
     pm.vm.hostname = "#{MASTERNAME}.#{DOMAIN}"
     pm.vm.network :private_network, ip: "#{MASTERIP}" 
     pm.vm.network :forwarded_port, guest: 5000, host: 5000
     pm.vm.provision :shell, :inline => $set_host_file
-    pm.vm.provision :shell, :path => "bootstrap.sh"
+    pm.vm.provision :shell, :path => "bootstrap_centos.sh"
+	
+  config.vm.define :puppetmaster2 do |pm|
+    pm.vm.box = "boxcutter/centos72"
+    pm.vm.hostname = "#{MASTERNAME}.#{DOMAIN}"
+    pm.vm.network :private_network, ip: "#{MASTERIP}" 
+    pm.vm.network :forwarded_port, guest: 5000, host: 5000
+    pm.vm.provision :shell, :inline => $set_host_file
+    pm.vm.provision :shell, :path => "bootstrap_centos.sh"	
+
     
 #    pm.vm.provider "virtualbox" do |v|
 #      v.memory=2048
@@ -60,29 +73,29 @@ Vagrant.configure VAGRANTFILE_API_VERSION do |config|
   end
 
   config.vm.define :puppetdb do |pm|
-    pm.vm.box = "boxcutter/ubuntu1604"
+    pm.vm.box = "boxcutter/centos72"
     pm.vm.hostname = "#{DBNAME}.#{DOMAIN}"
     pm.vm.network :private_network, ip: "#{DBIP}" 
     pm.vm.provision :shell, :inline => $set_host_file
-    pm.vm.provision :shell, :path => "install_agent.sh"
+    pm.vm.provision :shell, :path => "install_agent_centos.sh"
   end
 
   config.vm.define :puppetreports do |pm|
-    pm.vm.box = "boxcutter/ubuntu1604"
+    pm.vm.box = "boxcutter/centos72"
     pm.vm.hostname = "#{REPORTSNAME}.#{DOMAIN}"
     pm.vm.network :private_network, ip: "#{REPORTSIP}" 
     pm.vm.network :forwarded_port, guest: 5000, host: 5001
     pm.vm.provision :shell, :inline => $set_host_file
-    pm.vm.provision :shell, :path => "install_agent.sh"
+    pm.vm.provision :shell, :path => "install_agent_centos.sh"
   end
 
   AGENTS.each_with_index do |agent,index|
     config.vm.define "#{agent}".to_sym do |ag|
-        ag.vm.box = "boxcutter/ubuntu1604"
+        ag.vm.box = "boxcutter/centos72"
         ag.vm.hostname = "#{agent}.#{DOMAIN}"
         ag.vm.network :private_network, ip: "#{SUBNET}.#{index+10}"
         ag.vm.provision :shell, :inline => $set_host_file
-        ag.vm.provision :shell, :path => "install_agent.sh"
+        ag.vm.provision :shell, :path => "install_agent_centos.sh"
     end
   end  
 
