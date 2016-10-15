@@ -1,7 +1,8 @@
 echo "Bootstrapping"
 
 release=`cat /etc/centos-release | cut -d " " -f 4 | cut -d "." -f 1`
-env="production"
+#env="production"
+master="puppetmaster.vm.local"
 
 echo "Configuring puppetlabs repo"
 wget -q https://yum.puppetlabs.com/puppetlabs-release-pc1-el-$release.noarch.rpm -O /tmp/puppetlabs.rpm
@@ -10,7 +11,8 @@ echo "Updating yum cache"
 sudo yum check-update > /dev/null
 echo "Installing puppet-agent and git"
 sudo yum install -y puppet-agent git > /dev/null 2>&1
-
+sudo useradd puppet
+sudo chown -R puppet:puppet /etc/puppetlabs
 
 ### eyaml configuration
 echo "Copying keys /var/lib/puppet/secure"
@@ -61,7 +63,14 @@ echo "Installing r10k gem"
 echo "Deploying with r10k"
 /opt/puppetlabs/puppet/bin/r10k deploy environment -v -p
 
+echo "Run puppet"
+sudo /opt/puppetlabs/puppet/bin/puppet agent -t --server $master
+echo "Bootstrap done"
+echo "If you saw a cert issue, sign it on master and rerun puppet agent -t --server $master"
 
-echo "Performing first puppet run"
-#And remove default puppet.conf which raises warnings
-sudo /opt/puppetlabs/puppet/bin/puppet apply /etc/puppetlabs/code/environments/$env/manifests --modulepath=/etc/puppetlabs/code/environments/$env/modules:/etc/puppetlabs/code/environments/$env/site --environment=$env
+echo "Delete iptables rules"
+sudo iptables --flush > /dev/null 2>&1
+sudo service iptables save > /dev/null 2>&1
+#echo "Performing first puppet run"
+# And remove default puppet.conf which raises warnings
+#sudo /opt/puppetlabs/puppet/bin/puppet apply /etc/puppetlabs/code/environments/$env/manifests --modulepath=/etc/puppetlabs/code/environments/$env/modules:/etc/puppetlabs/code/environments/$env/site --environment=$env

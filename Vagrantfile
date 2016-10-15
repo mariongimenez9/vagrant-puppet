@@ -16,8 +16,8 @@ DBIP="#{SUBNET}.3"
 REPORTSNAME="puppetreports"
 REPORTSIP="#{SUBNET}.4"
 
-MASTERNAME="puppetmaster2"
-MASTERIP="#{SUBNET}.5"
+MASTERNAME2="puppetmaster2"
+MASTER2IP="#{SUBNET}.5"
 
 AGENTS=["websrv"]
 
@@ -56,14 +56,15 @@ Vagrant.configure VAGRANTFILE_API_VERSION do |config|
     pm.vm.network :forwarded_port, guest: 5000, host: 5000
     pm.vm.provision :shell, :inline => $set_host_file
     pm.vm.provision :shell, :path => "bootstrap_centos.sh"
-	
+ end
+  config.ssh.insert_key = false	
   config.vm.define :puppetmaster2 do |pm|
     pm.vm.box = "boxcutter/centos72"
-    pm.vm.hostname = "#{MASTERNAME}.#{DOMAIN}"
-    pm.vm.network :private_network, ip: "#{MASTERIP}" 
-    pm.vm.network :forwarded_port, guest: 5000, host: 5000
+    pm.vm.hostname = "#{MASTERNAME2}.#{DOMAIN}"
+    pm.vm.network :private_network, ip: "#{MASTER2IP}" 
+    pm.vm.network :forwarded_port, guest: 5000, host: 5002
     pm.vm.provision :shell, :inline => $set_host_file
-    pm.vm.provision :shell, :path => "bootstrap_centos.sh"	
+    pm.vm.provision :shell, :path => "bootstrap_centos_master2.sh"	
 
     
 #    pm.vm.provider "virtualbox" do |v|
