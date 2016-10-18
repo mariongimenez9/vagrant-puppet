@@ -19,6 +19,9 @@ REPORTSIP="#{SUBNET}.4"
 MASTERNAME2="puppetmaster2"
 MASTER2IP="#{SUBNET}.5"
 
+JENKINSNAME="puppetjenkins"
+JENKINSIP="#{SUBNET}.6"
+
 AGENTS=["websrv"]
 
 
@@ -86,6 +89,14 @@ Vagrant.configure VAGRANTFILE_API_VERSION do |config|
     pm.vm.hostname = "#{REPORTSNAME}.#{DOMAIN}"
     pm.vm.network :private_network, ip: "#{REPORTSIP}" 
     pm.vm.network :forwarded_port, guest: 5000, host: 5001
+    pm.vm.provision :shell, :inline => $set_host_file
+    pm.vm.provision :shell, :path => "install_agent_centos.sh"
+  end
+  
+  config.vm.define :puppetjenkins do |pm|
+    pm.vm.box = "boxcutter/centos72"
+    pm.vm.hostname = "#{JENKINSNAME}.#{DOMAIN}"
+    pm.vm.network :private_network, ip: "#{JENKINSIP}" 
     pm.vm.provision :shell, :inline => $set_host_file
     pm.vm.provision :shell, :path => "install_agent_centos.sh"
   end
