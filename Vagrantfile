@@ -67,7 +67,7 @@ Vagrant.configure VAGRANTFILE_API_VERSION do |config|
     pm.vm.network :private_network, ip: "#{MASTER2IP}" 
     pm.vm.network :forwarded_port, guest: 5000, host: 5002
     pm.vm.provision :shell, :inline => $set_host_file
-    pm.vm.provision :shell, :path => "bootstrap_centos_master2.sh"	
+    pm.vm.provision :shell, :path => "bootstrap_centos_master.sh"	
 
     
 #    pm.vm.provider "virtualbox" do |v|

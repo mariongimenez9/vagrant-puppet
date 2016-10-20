@@ -54,7 +54,7 @@ cat > /etc/puppetlabs/r10k/r10k.yaml <<EOF
     remote: https://github.com/mariongimenez9/puppet-r10k
     basedir: /etc/puppetlabs/code/environments
 EOF
-
+ 
 echo "Installing hiera-eyaml gem"
 /opt/puppetlabs/puppet/bin/gem install hiera-eyaml --no-ri --no-rdoc > /dev/null
 
