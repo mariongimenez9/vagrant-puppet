@@ -22,13 +22,20 @@ MASTER2IP="#{SUBNET}.5"
 JENKINSNAME="puppetjenkins"
 JENKINSIP="#{SUBNET}.6"
 
+LBNAME="puppetlb"
+LBIP="#{SUBNET}.7"
+
 AGENTS=["websrv"]
 
 
 #Generate a host file to share
 $hostfiledata="127.0.0.1 localhost\n#{MASTERIP} #{MASTERNAME}.#{DOMAIN} #{MASTERNAME}"
+$hostfiledata=$hostfiledata+"\n#{MASTER2IP} #{MASTERNAME2}.#{DOMAIN} #{MASTERNAME2}"
 $hostfiledata=$hostfiledata+"\n#{DBIP} #{DBNAME}.#{DOMAIN} #{DBNAME}"
 $hostfiledata=$hostfiledata+"\n#{REPORTSIP} #{REPORTSNAME}.#{DOMAIN} #{REPORTSNAME}"
+$hostfiledata=$hostfiledata+"\n#{JENKINSIP} #{JENKINSNAME}.#{DOMAIN} #{JENKINSNAME}"
+$hostfiledata=$hostfiledata+"\n#{LBIP} #{LBNAME}.#{DOMAIN} #{LBNAME}"
+
 AGENTS.each_with_index do |agent,index|
   $hostfiledata=$hostfiledata+"\n#{SUBNET}.#{index+10} #{agent}.#{DOMAIN} #{agent}"
 end
@@ -67,13 +74,21 @@ Vagrant.configure VAGRANTFILE_API_VERSION do |config|
     pm.vm.network :private_network, ip: "#{MASTER2IP}" 
     pm.vm.network :forwarded_port, guest: 5000, host: 5002
     pm.vm.provision :shell, :inline => $set_host_file
-    pm.vm.provision :shell, :path => "bootstrap_centos_master.sh"	
+    pm.vm.provision :shell, :path => "bootstrap_centos.sh"	
 
     
 #    pm.vm.provider "virtualbox" do |v|
 #      v.memory=2048
 #      v.cpus=2
 #    end
+  end
+  
+  config.vm.define :puppetlb do |pm|
+    pm.vm.box = "boxcutter/centos72"
+    pm.vm.hostname = "#{LBNAME}.#{DOMAIN}"
+    pm.vm.network :private_network, ip: "#{LBIP}" 
+    pm.vm.provision :shell, :inline => $set_host_file
+    pm.vm.provision :shell, :path => "bootstrap_centos_lb.sh"
   end
 
   config.vm.define :puppetdb do |pm|
@@ -93,13 +108,13 @@ Vagrant.configure VAGRANTFILE_API_VERSION do |config|
     pm.vm.provision :shell, :path => "install_agent_centos.sh"
   end
   
-  config.vm.define :puppetjenkins do |pm|
-    pm.vm.box = "boxcutter/centos72"
-    pm.vm.hostname = "#{JENKINSNAME}.#{DOMAIN}"
-    pm.vm.network :private_network, ip: "#{JENKINSIP}" 
-    pm.vm.provision :shell, :inline => $set_host_file
-    pm.vm.provision :shell, :path => "install_agent_centos.sh"
-  end
+#  config.vm.define :puppetjenkins do |pm|
+#    pm.vm.box = "boxcutter/centos72"
+#    pm.vm.hostname = "#{JENKINSNAME}.#{DOMAIN}"
+#    pm.vm.network :private_network, ip: "#{JENKINSIP}" 
+#    pm.vm.provision :shell, :inline => $set_host_file
+#    pm.vm.provision :shell, :path => "install_agent_centos.sh"
+#  end
 
   AGENTS.each_with_index do |agent,index|
     config.vm.define "#{agent}".to_sym do |ag|

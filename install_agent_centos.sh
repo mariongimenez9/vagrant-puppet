@@ -1,4 +1,4 @@
-master="puppetmaster.vm.local"
+master="puppetlb.vm.local"
 
 echo "Installing puppet"
 release=`cat /etc/centos-release | cut -d " " -f 4 | cut -d "." -f 1`
